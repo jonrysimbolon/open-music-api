@@ -3,17 +3,17 @@ class NotesHandler {
     this._service = service;
     this._validator = validator;
 
-    this.postNoteHandler = this.postNoteHandler.bind(this);
-    this.getNotesHandler = this.getNotesHandler.bind(this);
-    this.getNoteByIdHandler = this.getNoteByIdHandler.bind(this);
-    this.putNoteByIdHandler = this.putNoteByIdHandler.bind(this);
-    this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
+    this.postSongHandler = this.postSongHandler.bind(this);
+    this.getSongsHandler = this.getSongsHandler.bind(this);
+    this.getSongsByIdHandler = this.getSongsByIdHandler.bind(this);
+    this.putSongByIdHandler = this.putSongByIdHandler.bind(this);
+    this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
   }
 
-  async postNoteHandler(request, h) {
-    this._validator.validateNotePayload(request.payload);
-    const { title = 'untitled', body, tags } = request.payload;
-    const noteId = await this._service.addNote({ title, body, tags });
+  async postSongHandler(request, h) {
+    this._validator.validateSongPayload(request.payload);
+    const { title, year, genre, performer, duration, albumId } = request.payload;
+    const noteId = await this._service.addNote({ title, year, genre, performer, duration, albumId });
     const response = h.response({
       status: 'success',
       message: 'Catatan berhasil ditambahkan',
@@ -25,7 +25,7 @@ class NotesHandler {
     return response;
   }
 
-  async getNotesHandler() {
+  async getSongsHandler() {
     const notes = await this._service.getNotes();
     return {
       status: 'success',
@@ -35,7 +35,7 @@ class NotesHandler {
     };
   }
 
-  async getNoteByIdHandler(request, h) {
+  async getSongsByIdHandler(request, h) {
     const { id } = request.params;
     const note = await this._service.getNoteById(id);
     return {
@@ -46,7 +46,7 @@ class NotesHandler {
     };
   }
 
-  async putNoteByIdHandler(request, h) {
+  async putSongByIdHandler(request, h) {
     this._validator.validateNotePayload(request.payload);
     const { id } = request.params;
     await this._service.editNoteById(id, request.payload);
@@ -57,7 +57,7 @@ class NotesHandler {
     };
   }
 
-  async deleteNoteByIdHandler(request, h) {
+  async deleteSongByIdHandler(request, h) {
     const { id } = request.params;
     await this._service.deleteNoteById(id);
     return {
