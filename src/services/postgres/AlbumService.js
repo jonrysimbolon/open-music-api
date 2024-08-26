@@ -20,13 +20,13 @@ class AlbumsService {
     const result = await this._pool.query(query);
 
     if (!result.rows[0].album_id) {
-      throw new InvariantError('Catatan gagal ditambahkan');
+      throw new InvariantError('Album gagal ditambahkan');
     }
 
     return result.rows.map(albumIdMapDbToId)[0].albumId;
   }
 
-  async getAlbumById(id) {
+  /*async getAlbumById(id) { // for get five stars: must available songs on end of object 
     const query = {
       text: 'SELECT * FROM album WHERE album_id = $1',
       values: [id],
@@ -34,10 +34,39 @@ class AlbumsService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Catatan tidak ditemukan');
+      throw new NotFoundError('Album tidak ditemukan');
     }
 
     return result.rows.map(albumMapDBToModel)[0];
+  }*/
+
+  async getAlbumById(id) {
+    const queryAlbum = {
+      text: 'SELECT * FROM album WHERE album_id = $1',
+      values: [id],
+    };
+
+    const querySongs = {
+      text: 'SELECT song_id AS id, name AS title, performer FROM songs WHERE albumId = $1',
+      values: [id],
+    };
+
+    const resultAlbum = await this._pool.query(queryAlbum);
+    const resultSongs = await this._pool.query(querySongs);
+
+    if (!resultAlbum.rows.length) {
+      throw new NotFoundError('Album tidak ditemukan');
+    }
+
+    const album = resultAlbum.rows.map(albumMapDBToModel)[0];
+    album.songs = resultSongs.rows;
+
+    return {
+      status: 'success',
+      data: {
+        album,
+      },
+    };
   }
 
   async editAlbumById(id, { name, year }) {

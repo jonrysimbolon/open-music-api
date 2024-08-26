@@ -23,9 +23,10 @@ class AlbumsHandler {
     return response;
   }
 
-  async getAlbumByIdHandler(request, h) {
+  async getAlbumByIdHandler(request, h) { // for get five stars: must available songs on end of object 
     const { id } = request.params;
     const album = await this._service.getAlbumById(id);
+    
     return {
       status: 'success',
       data: {

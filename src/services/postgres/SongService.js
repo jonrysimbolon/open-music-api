@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
-const { albumMapDBToModel, albumIdMapDbToId } = require('../../utils');
+const { songMapDBToModel, songIdMapDbToId } = require('../../utils');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
@@ -13,56 +13,69 @@ class SongsService {
     const id = nanoid(16);
 
     const query = {
-      text: 'INSERT INTO openmusic VALUES($1, $2, $3) RETURNING album_id',
-      values: [id, name, year],
+      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6) RETURNING song_id',
+      values: [title, year, genre, performer, duration, albumId],
     };
 
     const result = await this._pool.query(query);
 
-    if (!result.rows[0].album_id) {
-      throw new InvariantError('Catatan gagal ditambahkan');
+    if (!result.rows[0].song_id) {
+      throw new InvariantError('Song gagal ditambahkan');
     }
 
-    return result.rows.map(albumIdMapDbToId)[0].albumId;
+    return result.rows.map(songIdMapDbToId)[0].albumId;
   }
 
-  async getAlbumById(id) {
+  async getSongs() {
     const query = {
-      text: 'SELECT * FROM openmusic WHERE album_id = $1',
+      text: 'SELECT * FROM songs',
+    };
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Song tidak ditemukan');
+    }
+
+    return result.rows.map(songMapDBToModel);
+  }
+
+  async getSongById(id) {
+    const query = {
+      text: 'SELECT * FROM songs WHERE song_id = $1',
       values: [id],
     };
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Catatan tidak ditemukan');
+      throw new NotFoundError('Song tidak ditemukan');
     }
 
-    return result.rows.map(albumMapDBToModel)[0];
+    return result.rows.map(songMapDBToModel)[0];
   }
 
-  async editAlbumById(id, { name, year }) {
+  async editSongById(id, { title, year, genre, performer, duration, albumId }) {
     const query = {
-      text: 'UPDATE openmusic SET name = $1, year = $2 WHERE album_id = $3 RETURNING album_id',
-      values: [name, year, id],
+      text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, albumId = $6 WHERE song_id = $3 RETURNING song_id',
+      values: [title, year, genre, performer, duration, albumId],
     };
 
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
+      throw new NotFoundError('Gagal memperbarui song. Id tidak ditemukan');
     }
   }
 
-  async deleteAlbumById(id) {
+  async deleteSongById(id) {
     const query = {
-      text: 'DELETE FROM openmusic WHERE album_id = $1 RETURNING album_id',
+      text: 'DELETE FROM songs WHERE song_id = $1 RETURNING song_id',
       values: [id],
     };
 
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Album gagal dihapus, Id tidak ditemukan');
+      throw new NotFoundError('Song gagal dihapus, Id tidak ditemukan');
     }
   }
 }

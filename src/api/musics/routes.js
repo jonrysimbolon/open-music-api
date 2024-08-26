@@ -7,7 +7,7 @@ const routes = (handler) => [
   {
     method: 'GET',
     path: '/songs',
-    handler: handler.getSongsHandler,
+    handler: handler.getSongsHandler, // must have this for 5 stars => 1. ?title-> mencari lagu berdasarkan judul, 2. ?performer-> mencari lagu berdasarkan performer.
   },
   {
     method: 'GET',

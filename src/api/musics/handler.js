@@ -1,4 +1,4 @@
-class NotesHandler {
+class SongsHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
@@ -12,59 +12,96 @@ class NotesHandler {
 
   async postSongHandler(request, h) {
     this._validator.validateSongPayload(request.payload);
-    const { title, year, genre, performer, duration, albumId } = request.payload;
-    const noteId = await this._service.addNote({ title, year, genre, performer, duration, albumId });
+    const { title, year, genre, performer, duration, albumId } =
+      request.payload;
+    const songId = await this._service.addSong({
+      title,
+      year,
+      genre,
+      performer,
+      duration,
+      albumId,
+    });
     const response = h.response({
       status: 'success',
-      message: 'Catatan berhasil ditambahkan',
       data: {
-        noteId,
+        songId,
       },
     });
     response.code(201);
     return response;
   }
 
-  async getSongsHandler() {
-    const notes = await this._service.getNotes();
+  /*async getSongsHandler() {  // must have this for 5 stars => 1. ?title-> mencari lagu berdasarkan judul, 2. ?performer-> mencari lagu berdasarkan performer.
+    const songs = await this._service.getSong();
     return {
       status: 'success',
       data: {
-        notes,
+        songs,
+      },
+    };
+  }*/
+
+  async getSongsHandler(request, h) {
+    const { title, performer } = request.query;
+
+    let queryText =
+      'SELECT song_id AS id, name AS title, performer FROM songs WHERE 1=1';
+    const queryValues = [];
+
+    if (title) {
+      queryText += ' AND name ILIKE $1';
+      queryValues.push(`%${title}%`);
+    }
+
+    if (performer) {
+      queryText += ` AND performer ILIKE $${queryValues.length + 1}`;
+      queryValues.push(`%${performer}%`);
+    }
+
+    const result = await this._pool.query({
+      text: queryText,
+      values: queryValues,
+    });
+
+    return {
+      status: 'success',
+      data: {
+        songs: result.rows,
       },
     };
   }
 
   async getSongsByIdHandler(request, h) {
     const { id } = request.params;
-    const note = await this._service.getNoteById(id);
+    const song = await this._service.getSongById(id);
     return {
       status: 'success',
       data: {
-        note,
+        song,
       },
     };
   }
 
   async putSongByIdHandler(request, h) {
-    this._validator.validateNotePayload(request.payload);
+    this._validator.validateSongPayload(request.payload);
     const { id } = request.params;
-    await this._service.editNoteById(id, request.payload);
+    await this._service.editSongById(id, request.payload);
 
     return {
       status: 'success',
-      message: 'Catatan berhasil diperbarui',
+      message: 'Song berhasil diperbarui',
     };
   }
 
   async deleteSongByIdHandler(request, h) {
     const { id } = request.params;
-    await this._service.deleteNoteById(id);
+    await this._service.deleteSongById(id);
     return {
       status: 'success',
-      message: 'Catatan berhasil dihapus',
+      message: 'Song berhasil dihapus',
     };
   }
 }
 
-module.exports = NotesHandler;
+module.exports = SongsHandler;
