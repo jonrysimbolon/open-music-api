@@ -6,12 +6,12 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       primaryKey: true,
     },
-    name: {
+    title: {
       type: 'TEXT',
       notNull: true,
     },
     year: {
-      type: 'TEXT',
+      type: 'INTEGER',
       notNull: true,
     },
     genre: {
@@ -25,7 +25,7 @@ exports.up = (pgm) => {
     duration: {
       type: 'INTEGER',
     },
-    albumId: {
+    album_id: {
       type: 'TEXT',
     },
   });

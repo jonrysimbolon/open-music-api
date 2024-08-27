@@ -13,8 +13,8 @@ class SongsService {
     const id = nanoid(16);
 
     const query = {
-      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6) RETURNING song_id',
-      values: [title, year, genre, performer, duration, albumId],
+      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING song_id',
+      values: [id, title, year, genre, performer, duration, albumId],
     };
 
     const result = await this._pool.query(query);
@@ -23,14 +23,31 @@ class SongsService {
       throw new InvariantError('Song gagal ditambahkan');
     }
 
-    return result.rows.map(songIdMapDbToId)[0].albumId;
+    return result.rows.map(songIdMapDbToId)[0].songId;
   }
 
-  async getSongs() {
-    const query = {
-      text: 'SELECT * FROM songs',
-    };
-    const result = await this._pool.query(query);
+  async getSongs({ title, performer }) {
+    let queryText = 'SELECT song_id, title, performer FROM songs';
+    const queryValues = [];
+
+    if (title) {
+      queryText += ' WHERE title ILIKE $1';
+      queryValues.push(`%${title}%`);
+    }
+
+    if (performer) {
+      if (title) {
+        queryText += ` AND performer ILIKE $${queryValues.length + 1}`;
+      } else {
+        queryText += ` WHERE performer ILIKE $${queryValues.length + 1}`;
+      }
+      queryValues.push(`%${performer}%`);
+    }
+
+    const result = await this._pool.query({
+      text: queryText,
+      values: queryValues,
+    });
 
     if (!result.rows.length) {
       throw new NotFoundError('Song tidak ditemukan');
@@ -55,8 +72,8 @@ class SongsService {
 
   async editSongById(id, { title, year, genre, performer, duration, albumId }) {
     const query = {
-      text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, albumId = $6 WHERE song_id = $3 RETURNING song_id',
-      values: [title, year, genre, performer, duration, albumId],
+      text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE song_id = $7 RETURNING song_id',
+      values: [title, year, genre, performer, duration, albumId, id],
     };
 
     const result = await this._pool.query(query);
