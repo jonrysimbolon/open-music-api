@@ -1,10 +1,10 @@
-const albumIdMapDbToId = ({album_id}) => ({
-  albumId: album_id
-})
+const albumIdMapDbToId = ({ album_id }) => ({
+  albumId: album_id,
+});
 
-const songIdMapDbToId = ({song_id}) => ({
-  songId: song_id
-})
+const songIdMapDbToId = ({ song_id }) => ({
+  songId: song_id,
+});
 
 const albumMapDBToModel = ({ album_id, name, year }) => ({
   id: album_id,
@@ -12,11 +12,7 @@ const albumMapDBToModel = ({ album_id, name, year }) => ({
   year,
 });
 
-const songHalfMapDbToModel = ({
-  song_id,
-  title,
-  performer,
-}) => ({
+const songHalfMapDbToModel = ({ song_id, title, performer }) => ({
   id: song_id,
   title,
   performer,
@@ -40,4 +36,10 @@ const songMapDBToModel = ({
   albumId: album_id,
 });
 
-module.exports = { albumMapDBToModel, songHalfMapDbToModel, songMapDBToModel, albumIdMapDbToId, songIdMapDbToId };
+module.exports = {
+  albumMapDBToModel,
+  songHalfMapDbToModel,
+  songMapDBToModel,
+  albumIdMapDbToId,
+  songIdMapDbToId,
+};
