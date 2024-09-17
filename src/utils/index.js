@@ -36,10 +36,17 @@ const songMapDBToModel = ({
   albumId: album_id,
 });
 
+const playlistMapDbToModel = ({ id, name, owner }) => ({
+  id,
+  name,
+  username: owner,
+});
+
 module.exports = {
   albumMapDBToModel,
   songHalfMapDbToModel,
   songMapDBToModel,
   albumIdMapDbToId,
   songIdMapDbToId,
+  playlistMapDbToModel,
 };
