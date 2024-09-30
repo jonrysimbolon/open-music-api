@@ -1,3 +1,3 @@
 # OPEN MUSIC API
 
-- versi 2.0
+- versi 3.0
