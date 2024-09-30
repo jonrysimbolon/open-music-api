@@ -88,7 +88,10 @@ class PlaylistService {
     let results = await this._pool.query(query);
 
     if (!results.rows.length) {
-      results = await this.getSongsInsidePlaylistsCollaboration(playlistId, owner);
+      results = await this.getSongsInsidePlaylistsCollaboration(
+        playlistId,
+        owner,
+      );
     }
 
     const playlist = {

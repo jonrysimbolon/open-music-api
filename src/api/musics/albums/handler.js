@@ -21,15 +21,55 @@ class AlbumsHandler {
     return response;
   }
 
-  async getAlbumByIdHandler(request) {
+  async postAlbumIdLikesHandler(request, h) {
+    const { id: albumId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+    await this._service.getAlbumWithId(albumId);
+    await this._service.checkUserLikeAlbum({ albumId, credentialId });
+    await this._service.addLikeAlbumById({ albumId, credentialId });
+    const response = h.response({
+      status: 'success',
+      message: 'Berhasil menyukai album',
+    });
+    response.code(201);
+    return response;
+  }
+
+  async getAlbumByIdHandler(request, h) {
     const { id } = request.params;
-    const album = await this._service.getAlbumById(id);
-    return {
+    const { album, isCache } = await this._service.getAlbumById(id);
+    const response = h.response({
       status: 'success',
       data: {
         album,
       },
-    };
+    });
+
+    if (isCache) {
+      response.header('X-Data-Source', 'cache');
+    } else {
+      response.header('X-Data-Source', 'not-cache');
+    }
+    return response;
+  }
+
+  async getAlbumByIdLikesHandler(request, h) {
+    const { id } = request.params;
+    const { likes, isCache } = await this._service.getCountLikeById(id);
+    const response = h.response({
+      status: 'success',
+      data: {
+        likes,
+      },
+    });
+
+    if (isCache) {
+      response.header('X-Data-Source', 'cache');
+    } else {
+      response.header('X-Data-Source', 'not-cache');
+    }
+
+    return response;
   }
 
   async putAlbumByIdHandler(request) {
@@ -49,6 +89,16 @@ class AlbumsHandler {
     return {
       status: 'success',
       message: 'Album berhasil dihapus',
+    };
+  }
+
+  async deleteAlbumByIdLikesHandler(request) {
+    const { id: albumId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+    await this._service.deleteLikeAlbumById(albumId, credentialId);
+    return {
+      status: 'success',
+      message: 'Like pada album berhasil dihapus',
     };
   }
 }

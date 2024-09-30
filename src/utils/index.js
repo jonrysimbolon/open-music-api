@@ -6,10 +6,13 @@ const songIdMapDbToId = ({ song_id }) => ({
   songId: song_id,
 });
 
-const albumMapDBToModel = ({ album_id, name, year }) => ({
+const albumMapDBToModel = ({
+  album_id, name, year, cover,
+}) => ({
   id: album_id,
   name,
   year,
+  coverUrl: cover,
 });
 
 const songHalfMapDbToModel = ({ song_id, title, performer }) => ({
