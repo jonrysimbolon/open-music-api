@@ -12,12 +12,14 @@ class ExportsHandler {
   async postExportPlaylistsHandler(request, h) {
     this._validator.validateExportPlaylistsPayload(request.payload);
 
+    const { id: credentialId } = request.auth.credentials;
+    const { playlistId } = request.params;
+
     const message = {
+      playlistId,
+      userId: credentialId,
       targetEmail: request.payload.targetEmail,
     };
-
-    const { playlistId } = request.params;
-    const { id: credentialId } = request.auth.credentials;
 
     await this._playlistService.verifyPlaylistAccess(playlistId, credentialId);
 
@@ -25,7 +27,7 @@ class ExportsHandler {
 
     const response = h.response({
       status: 'success',
-      message: 'Permintaan Anda dalam antrean',
+      message: 'Permintaan Anda sedang kami proses',
     });
     response.code(201);
     return response;
